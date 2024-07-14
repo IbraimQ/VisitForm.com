@@ -86,6 +86,10 @@ class Visit(db.Model):
 def index():
     return render_template('index.html')
 
+@app.route('/')
+def index():
+    return render_template('index.html')
+
 @app.route('/form')
 def form():
     managers = Manager.query.all()
@@ -104,6 +108,7 @@ def login():
         else:
             flash('Invalid email or password')
     return render_template('login.html')
+
 
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():

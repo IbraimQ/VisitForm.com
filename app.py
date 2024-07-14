@@ -83,11 +83,11 @@ class Visit(db.Model):
     gate = db.relationship('Gate', backref=db.backref('visits', lazy=True))
 
 @app.route('/')
-def index():
+def choice():
     return render_template('index.html')
 
-@app.route('/form')
-def form():
+@app.route('/index')
+def index():
     managers = Manager.query.all()
     gates = Gate.query.all()
     return render_template('form.html', managers=managers, gates=gates)
@@ -259,6 +259,7 @@ def submit_form():
         return render_template('submit.html')
     except Exception as e:
         return str(e)
+
 
 @app.route('/update_visit_status/<int:visit_id>', methods=['POST'])
 def update_visit_status(visit_id):

@@ -206,7 +206,6 @@ def submit_form():
         pdf.cell(200, 10, txt=f"Number of Visitors: {num_visitors}", ln=True)
         pdf.cell(200, 10, txt=f"Date/Time: {date_time.strftime('%Y-%m-%d %I:%M %p')}", ln=True)
         pdf.cell(200, 10, txt=f"Gate Number: {gate_number}", ln=True)
-
         # Add visitor details to email body
         body_html += f"""
             <tr>
@@ -260,7 +259,6 @@ def submit_form():
         return render_template('submit.html')
     except Exception as e:
         return str(e)
-
 
 @app.route('/update_visit_status/<int:visit_id>', methods=['POST'])
 def update_visit_status(visit_id):

@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
+from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
 from flask_mail import Mail, Message
 from flask_migrate import Migrate
@@ -71,7 +71,7 @@ class Visitor(db.Model):
 # Visit Model
 class Visit(db.Model):
     __tablename__ = 'Visits'
-    VisitID = db.Column(db.Integer, primary_key=True)
+    VisitID = db.Column(db.Integer, primary key=True)
     VisitorID = db.Column(db.Integer, db.ForeignKey('Visitors.VisitorID'), nullable=False)
     ManagerID = db.Column(db.Integer, db.ForeignKey('Managers.ManagerID'), nullable=False)
     VisitDate = db.Column(db.DateTime, nullable=False)
@@ -83,11 +83,11 @@ class Visit(db.Model):
     gate = db.relationship('Gate', backref=db.backref('visits', lazy=True))
 
 @app.route('/')
-def choice():
-    return render_template('index.html')
+def home():
+    return send_from_directory('.', 'index.html')
 
-@app.route('/index')
-def index():
+@app.route('/form')
+def form():
     managers = Manager.query.all()
     gates = Gate.query.all()
     return render_template('form.html', managers=managers, gates=gates)

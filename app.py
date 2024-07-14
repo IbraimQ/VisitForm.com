@@ -82,16 +82,16 @@ class Visit(db.Model):
     manager = db.relationship('Manager', backref=db.backref('visits', lazy=True))
     gate = db.relationship('Gate', backref=db.backref('visits', lazy=True))
 
-
 @app.route('/')
+def choice():
+    return render_template('choice.html')
+
+@app.route('/index')
 def index():
     managers = Manager.query.all()
     gates = Gate.query.all()
     return render_template('index.html', managers=managers, gates=gates)
 
-@app.route('/choice')
-def choice():
-    return render_template('choice.html')
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -207,7 +207,6 @@ def submit_form():
         pdf.cell(200, 10, txt=f"Number of Visitors: {num_visitors}", ln=True)
         pdf.cell(200, 10, txt=f"Date/Time: {date_time.strftime('%Y-%m-%d %I:%M %p')}", ln=True)
         pdf.cell(200, 10, txt=f"Gate Number: {gate_number}", ln=True)
-
         # Add visitor details to email body
         body_html += f"""
             <tr>

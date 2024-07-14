@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visitor Request Form</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/form.css') }}">
+    <style>
+        body, html {
+            background-image: url('{{ url_for('static', filename='assets/bg-img.png') }}');
+        }
+    </style>
+    <script>
+        function addVisitorFields() {
+            const numVisitors = document.getElementById('numVisitors').value;
+            const visitorsContainer = document.getElementById('VisitorsContainer');
+            visitorsContainer.innerHTML = '';
+
+            for (let i = 0; i < numVisitors; i++) {
+                const visitorSet = document.createElement('div');
+                visitorSet.className = 'visitor-set';
+
+                visitorSet.innerHTML = `
+                    <h3>Visitor ${i + 1}</h3>
+                    <label for="firstName${i}">FIRST NAME*</label><br>
+                    <input type="text" id="firstName${i}" name="firstName[]" required class="contact-inputs"><br><br>
+                    <label for="lastName${i}">LAST NAME*</label><br>
+                    <input type="text" id="lastName${i}" name="lastName[]" required class="contact-inputs"><br><br>
+                    <label for="phoneNumber${i}">PHONE NUMBER*</label><br>
+                    <input type="tel" id="phoneNumber${i}" name="phoneNumber[]" required oninput="validateNumberInput(this, 10)" class="contact-inputs"><br><br>
+                    <label for="idNumber${i}">ID/IQAMA NUMBER*</label><br>
+                    <input type="text" id="idNumber${i}" name="idNumber[]" required oninput="validateNumberInput(this, 10)" class="contact-inputs"><br><br>
+                    <label for="email${i}">EMAIL*</label><br>
+                    <input type="email" id="email${i}" name="email[]" required class="contact-inputs"><br><br>
+                    <label for="idAttachment${i}">ATTACH ID/IQAMA FILE*</label><br>
+                    <input type="file" id="idAttachment${i}" name="idAttachment[]" required><br><br>
+                `;
+
+                visitorsContainer.appendChild(visitorSet);
+            }
+        }
+
+        function validateNumberInput(input, length) {
+            if (input.value.length > length) {
+                input.value = input.value.slice(0, length);
+            }
+        }
+
+        window.onload = function() {
+            addVisitorFields(); // Initialize fields based on default value
+        };
+    </script>
+</head>
+<body>
+    <div class="navbar">
+        <div class="logo">
+            <img src="{{ url_for('static', filename='assets/Camreon-icon.jpeg') }}" alt="Logo">
+        </div>
+        <div class="nav-options">
+            <a href="{{ url_for('choice') }}">Home</a>
+            <a href="#">Link</a>
+            <a href="#">Dropdown</a>
+            <a href="#" class="disabled">Disabled</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="left">
+            <h1>Visitor Request Form</h1>
+            <p>This Form will help the company to manage the system better</p>
+            <p>Schedule an appointment to visit the company by filling the fields and choosing a manager</p>
+        </div>
+        <div class="right">
+            <form id="visitForm" action="/submit" method="POST" enctype="multipart/form-data">
+                <label for="numVisitors">Choose the number of Visitors:</label><br>
+                <input type="number" id="numVisitors" name="numVisitors" min="1" max="15" value="1" onchange="addVisitorFields()" class="contact-inputs"><br><br>
+
+                <div id="VisitorsContainer"></div>
+                
+                <label for="dateTime">DATE/TIME*</label><br>
+                <input type="datetime-local" id="dateTime" name="dateTime" required><br><br>
+                <label for="manager">CHOOSE A MANAGER*</label><br>
+                <select id="manager" name="manager" required>
+                    {% for manager in managers %}
+                    <option value="{{ manager.id }}">{{ manager.name }}</option>
+                    {% endfor %}
+                </select><br><br>
+                <label for="gateNumber">Gate Number:</label>
+                <select id="gateNumber" name="gateNumber" required>
+                    {% for gate in gates %}
+                    <option value="{{ gate.id }}">{{ gate.gate_number }}</option>
+                    {% endfor %}
+                </select><br><br>
+
+                <input type="hidden" name="status" value="Pending">
+
+                <button type="submit">Submit</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

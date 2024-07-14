@@ -1,0 +1,104 @@
+body, html {
+    height: 100%;
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-attachment: fixed;
+    background-size: cover;
+    overflow-x: hidden; /* Prevent horizontal overflow */
+}
+
+.navbar {
+    width: 100%;
+    background-color: white;
+    padding: 10px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    box-sizing: border-box;
+}
+
+.logo img {
+    height: 50px;
+    width: 130%;
+}
+
+.nav-options {
+    display: flex;
+    align-items: center;
+}
+
+.nav-options a {
+    margin: 0 15px;
+    text-decoration: none;
+    color: #333;
+    font-weight: bold;
+    white-space: nowrap; /* Prevent text from wrapping */
+}
+
+.nav-options a:hover {
+    color: #007BFF;
+}
+
+.container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-start; /* Align items to the start to allow expansion */
+    min-height: 100vh;
+    padding: 20px 5%; /* Adjusted padding for better fit */
+    background-color: rgba(0, 0, 0, 0.6); /* Adding a slight overlay for better text readability */
+    box-sizing: border-box; /* Include padding in the element's total width and height */
+    overflow-y: auto; /* Enable vertical scrolling */
+}
+
+.left {
+    color: white;
+    max-width: 45%;
+}
+
+.right {
+    max-width: 45%;
+    width: 100%;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+}
+
+label {
+    margin-top: 10px;
+    font-weight: bold;
+    color: white; /* Change label color to white */
+}
+
+input, select {
+    margin-top: 5px;
+    padding: 10px;
+    width: 100%; /* Make all inputs and selects full width */
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: rgba(255, 255, 255, 0.8); /* Make input background slightly transparent */
+    box-sizing: border-box; /* Include padding and border in the element's total width and height */
+}
+
+button {
+    margin-top: 20px;
+    padding: 10px;
+    background-color: #007BFF;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+h3 {
+    color: white; /* Change visitor heading color to white */
+}

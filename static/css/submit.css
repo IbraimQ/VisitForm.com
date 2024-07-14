@@ -1,0 +1,36 @@
+body, html {
+    height: 100%;
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: url('../assets/bg-img.png') no-repeat center center fixed;
+    background-size: cover;
+    overflow-x: hidden; /* Prevent horizontal overflow */
+}
+
+.success-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.6); /* Adding a slight overlay for better text readability */
+    color: white;
+    text-align: center;
+}
+
+.success-image {
+    width: 50px; /* Adjust the width as needed */
+    height: 50px;
+    margin-bottom: 20px;
+}
+
+.back-link {
+    margin-top: 20px;
+    font-size: 16px;
+    color: #007bff;
+    text-decoration: none;
+}
+
+.back-link:hover {
+    text-decoration: underline;
+}

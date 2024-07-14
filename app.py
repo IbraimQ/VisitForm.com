@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify, send_from_directory
+from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_mail import Mail, Message
 from flask_migrate import Migrate
@@ -33,8 +33,8 @@ migrate = Migrate(app, db)
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
-app.config['MAIL_USERNAME'] = 'ihemaa.4@gmail.com'
-app.config['MAIL_PASSWORD'] = 'ohki nqpm edsz crjh'
+app.config['MAIL_USERNAME'] = 'your-email@gmail.com'
+app.config['MAIL_PASSWORD'] = 'your-email-password'
 
 mail = Mail(app)
 
@@ -71,7 +71,7 @@ class Visitor(db.Model):
 # Visit Model
 class Visit(db.Model):
     __tablename__ = 'Visits'
-    VisitID = db.Column(db.Integer, primary key=True)
+    VisitID = db.Column(db.Integer, primary_key=True)
     VisitorID = db.Column(db.Integer, db.ForeignKey('Visitors.VisitorID'), nullable=False)
     ManagerID = db.Column(db.Integer, db.ForeignKey('Managers.ManagerID'), nullable=False)
     VisitDate = db.Column(db.DateTime, nullable=False)
@@ -83,8 +83,8 @@ class Visit(db.Model):
     gate = db.relationship('Gate', backref=db.backref('visits', lazy=True))
 
 @app.route('/')
-def home():
-    return send_from_directory('.', 'index.html')
+def index():
+    return render_template('index.html')
 
 @app.route('/form')
 def form():
@@ -243,7 +243,7 @@ def submit_form():
     pdf_output = f"uploads/Visitor_Details.pdf"
     pdf.output(pdf_output)
 
-    msg = Message(subject="New Visitor Request", sender='ihemaa.4@gmail.com', recipients=[manager_email])
+    msg = Message(subject="New Visitor Request", sender='your-email@gmail.com', recipients=[manager_email])
     msg.body = "Please find the visitor details attached."
     msg.html = body_html
 
@@ -260,7 +260,6 @@ def submit_form():
     except Exception as e:
         return str(e)
 
-
 @app.route('/update_visit_status/<int:visit_id>', methods=['POST'])
 def update_visit_status(visit_id):
     if 'manager_id' not in session:
@@ -274,7 +273,7 @@ def update_visit_status(visit_id):
     subject = "Update on Your Visit Request"
     body = f"Your visit request has been {status.lower()}."
 
-    msg = Message(subject, sender='ihemaa.4@gmail.com', recipients=[visitor.Email])
+    msg = Message(subject, sender='your-email@gmail.com', recipients=[visitor.Email])
     msg.body = body
 
     try:

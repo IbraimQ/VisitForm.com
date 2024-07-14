@@ -56,20 +56,21 @@
                 <p class="subtitle">You can change your account at any time</p>
             </div>
             <div class="choice-container">
-                <div class="choice-box" id="visitor-box" onclick="window.location.href='{{ url_for('index') }}'">
+                <div class="choice-box" id="visitor-box" onclick="window.location.href='form'">
                     <div class="choice-card">
-                        <img src="{{ url_for('static', filename='assets/visitor-icon.png') }}" alt="Visitor Icon" class="choice-image">
+                        <img src="static/assets/visitor-icon.png" alt="Visitor Icon" class="choice-image">
                         <div class="choice-title">Visitors Form</div>
                         <div class="choice-description">Fill out the visitor form</div>
                     </div>
                 </div>
-                <div class="choice-box" id="manager-box" onclick="window.location.href='{{ url_for('login') }}'">
+                <div class="choice-box" id="manager-box" onclick="window.location.href='login'">
                     <div class="choice-card">
-                        <img src="{{ url_for('static', filename='assets/managers-icon.png') }}" alt="Manager Icon" class="choice-image">
+                        <img src="static/assets/managers-icon.png" alt="Manager Icon" class="choice-image">
                         <div class="choice-title">Manager Log in</div>
                         <div class="choice-description">Log in to view forms assigned to you.</div>
                     </div>
                 </div>
+                
             </div>
         </div>
     </div>

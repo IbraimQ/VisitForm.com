@@ -215,3 +215,11 @@ label {
     color: #fff; /* White text color */
     margin-bottom: 5px;
 }
+body, html {
+    height: 100%;
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: url('../assets/BG-icon.jpeg') no-repeat center center fixed;
+    background-size: cover;
+    overflow-x: hidden; /* Prevent horizontal overflow */
+}

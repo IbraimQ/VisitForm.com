@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: visitform
+    env: python
+    plan: free
+    region: oregon
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "gunicorn app:app"
+    envVars:
+      - key: SECRET_KEY
+        value: "132"
+      - key: SQLALCHEMY_DATABASE_URI
+        value: "your_database_uri"
+      - key: MAIL_USERNAME
+        value: "ihemaa.4@gmail.com"
+      - key: MAIL_PASSWORD
+        value: "A123+123*/"

@@ -1,46 +1,29 @@
-* {
-    padding: 0;
-    margin: 0;
-    box-sizing: border-box;
-}
-
-html, body {
+body, html {
     height: 100%;
-    font-family: 'Outfit', sans-serif;
-    background: url('static/assets/BG-icon.jpeg') no-repeat center center fixed;
-    background-size: cover;
     margin: 0;
-    overflow-y: auto; /* Ensure the body can scroll */
-    overflow-x: hidden; /* Prevent horizontal scrolling */
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-}
-
-body {
-    padding-top: 70px; /* Add padding to account for fixed navbar */
+    font-family: Arial, sans-serif;
+    background: url('../assets/BG-icon.jpeg') no-repeat center center fixed;
+    background-size: cover;
+    overflow-x: hidden; /* Prevent horizontal overflow */
 }
 
 .navbar {
-    height: 70px; /* Keep the height as it is */
-    padding-top: 0px; /* Adjust this value to move the content up */
-    padding-bottom: 0px; /* Adjust this value if necessary */
-    margin-top: -10px; /* Move the navbar up by 10px */
-    background-color: white; /* Ensure the navbar has a white background */
+    height: 70px;
+    padding-top: 0;
+    padding-bottom: 0;
+    margin-top: -10px;
+    background-color: white;
 }
 
 .navbar-brand {
     display: flex;
     align-items: center;
-    padding-top: 0;
-    padding-bottom: 0;
 }
 
 .navbar-nav .nav-link {
     padding-top: 0;
     padding-bottom: 0;
-    line-height: 50px; /* Ensure links are vertically centered */
+    line-height: 50px;
 }
 
 .content {
@@ -53,11 +36,11 @@ body {
 
 .main-box {
     background-color: white;
-    border-radius: 10px; /* Smooth corners */
+    border-radius: 10px;
     padding: 40px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     text-align: center;
-    width: 80%; /* Adjusted width for the main box */
+    width: 80%;
     max-width: 800px;
 }
 
@@ -68,36 +51,37 @@ body {
 
 .page-title {
     font-size: 36px;
-    color: #000; /* Black text color */
+    color: #000;
     font-weight: bold;
 }
 
 .subtitle {
     font-size: 16px;
-    color: #666; /* Grey text color */
+    color: #666;
 }
 
 .choice-container {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 20px; /* Add space between the boxes */
+    gap: 20px;
     margin-top: 20px;
+    flex-wrap: wrap; /* Ensure wrapping for smaller screens */
 }
 
 .choice-box {
     background-color: white;
-    border: 2px solid #090909; /* Black border */
-    border-radius: 0px; /* Smooth corners */
+    border: 2px solid #090909;
     padding: 40px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    width: 300px; /* Adjusted width for individual boxes */
-    height: 350px; /* Adjusted height for individual boxes */
+    width: 300px;
+    height: 350px;
     text-align: center;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    margin-bottom: 20px; /* Add margin for bottom spacing */
 }
 
 .choice-card {
@@ -106,14 +90,8 @@ body {
     align-items: center;
     cursor: pointer;
     padding: 20px;
-    background-color: white; /* White background for each card */
-    border-radius: 0px;
+    background-color: white;
     transition: transform 0.2s;
-}
-
-.choice-icon {
-    font-size: 100px; /* Adjust the size of the icons */
-    color: #000; /* Black color for the icons */
 }
 
 .choice-image {
@@ -128,98 +106,16 @@ body {
 .choice-title {
     margin-top: 10px;
     font-size: 20px;
-    color: #000; /* Black text color */
+    color: #000;
 }
 
 .choice-description {
     margin-top: 10px;
     font-size: 14px;
-    color: #666; /* Grey text color */
-    display: none; /* Initially hidden */
+    color: #666;
+    display: none;
 }
 
 .choice-card:hover .choice-description {
-    display: block; /* Show on hover */
-}
-
-.login-box, .signup-box {
-    background-color: rgba(0, 0, 0, 0.6); /* Transparent black background */
-    border: 2px solid #d5bda6; /* Beige border */
-    border-radius: 0px; /* Smooth corners */
-    padding: 40px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    width: 600px;
-    text-align: center;
-    display: none; /* Hide by default */
-}
-
-.login-box form, .signup-box form {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    align-items: flex-start; /* Align items to the left */
-}
-
-.login-box input, .signup-box input {
-    height: 40px;
-    padding: 10px;
-    font-size: 16px;
-    border: 2px solid #d5bda6;
-    border-radius: 0px;
-    outline: none;
-    width: 100%;
-}
-
-.login-box button, .signup-box button {
-    padding: 15px 30px; /* Increase padding for a larger button */
-    font-size: 16px; /* Ensure font size is appropriate */
-    color: #fff;
-    background: linear-gradient(270deg, #ff994f, #fa6d86);
-    border: none;
-    border-radius: 0px;
-    cursor: pointer;
-    align-self: stretch; /* Make the button stretch to the full width */
-    margin-top: 20px; /* Add margin to separate from inputs */
-}
-
-.login-links, .signup-links {
-    display: flex;
-    justify-content: space-between;
-    font-size: 14px;
-    width: 100%;
-    margin-top: 10px; /* Add margin to separate from the button */
-}
-
-.login-links a, .signup-links a {
-    color: #fff; /* White text color */
-    text-decoration: none;
-}
-
-.login-links a:hover, .signup-links a:hover {
-    text-decoration: underline;
-}
-
-a {
-    color: #fff; /* White text color */
-    text-decoration: none;
-    display: inline-block;
-    margin-top: 20px;
-    align-self: center; /* Center the link */
-}
-
-a:hover {
-    text-decoration: underline;
-}
-
-label {
-    color: #fff; /* White text color */
-    margin-bottom: 5px;
-}
-body, html {
-    height: 100%;
-    margin: 0;
-    font-family: Arial, sans-serif;
-    background: url('../assets/BG-icon.jpeg') no-repeat center center fixed;
-    background-size: cover;
-    overflow-x: hidden; /* Prevent horizontal overflow */
+    display: block;
 }

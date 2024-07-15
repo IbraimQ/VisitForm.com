@@ -1,19 +1,19 @@
 from app import app, db, Manager, Gate
 
-# Create the database tables
+# Create the database tables and add initial data
 with app.app_context():
     db.create_all()
 
     # Add initial managers
     managers = [
-        Manager(Name='Ibrahim Al-Hamed', Email='ihemaa.4@gmail.com', Password='A123+123*/'),
-        Manager(Name='Mashel Al-Hamed', Email='s2212001102@uhb.edu.sa', Password='password123')
+        Manager(name='Ibrahim Al-Hamed', email='ihemaa.4@gmail.com', password='A123+123*/'),
+        Manager(name='Mashel Al-Hamed', email='s2212001102@uhb.edu.sa', password='password123')
     ]
 
     # Add initial gates
     gates = [
-        Gate(GateNumber='1', Location='Main Entrance'),
-        Gate(GateNumber='2', Location='Back Entrance')
+        Gate(gate_number='1', location='Main Entrance'),
+        Gate(gate_number='2', location='Back Entrance')
     ]
 
     # Add the managers and gates to the session and commit

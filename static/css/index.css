@@ -7,7 +7,7 @@
 html, body {
     height: 100%;
     font-family: 'Outfit', sans-serif;
-    background: url('../assets/BG-icon.jpeg') no-repeat center center fixed;
+    background: url('static/assets/BG-icon.jpeg') no-repeat center center fixed;
     background-size: cover;
     margin: 0;
     overflow-y: auto; /* Ensure the body can scroll */

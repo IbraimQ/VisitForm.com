@@ -8,7 +8,7 @@ import os
 from fpdf import FPDF
 
 app = Flask(__name__, template_folder='templates', static_folder='static')
-app.secret_key = 'your_secret_key'
+app.secret_key = os.urandom(24)
 app.config['DEBUG'] = True
 
 # Error handler for detailed error logging
@@ -23,7 +23,7 @@ server = 'LAPTOP-77204R0A\\SQLEXPRESS'
 database = 'FormVisitors'
 driver = 'ODBC Driver 17 for SQL Server'
 
-app.config['SQLALCHEMY_DATABASE_URI'] = f'mssql+pyodbc://@{server}/{database}?driver={driver}&trusted_connection=yes'
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'mssql+pyodbc://@LAPTOP-77204R0A\\SQLEXPRESS/FormVisitors?driver=ODBC+Driver+17+for+SQL+Server&trusted_connection=yes')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
@@ -33,8 +33,8 @@ migrate = Migrate(app, db)
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
-app.config['MAIL_USERNAME'] = 'your-email@gmail.com'
-app.config['MAIL_PASSWORD'] = 'your-email-password'
+app.config['MAIL_USERNAME'] = 'ihemaa.4@gmail.com.com'
+app.config['MAIL_PASSWORD'] = 'A123+123*/'
 
 mail = Mail(app)
 
@@ -282,6 +282,17 @@ def update_visit_status(visit_id):
         return str(e)
         
     return redirect(url_for('manager_dashboard'))
+
+# Add the new route to fetch managers and gates
+@app.route('/api/managers_and_gates', methods=['GET'])
+def get_managers_and_gates():
+    managers = Manager.query.all()
+    gates = Gate.query.all()
+    data = {
+        'managers': [{'id': manager.id, 'name': manager.name} for manager in managers],
+        'gates': [{'id': gate.id, 'gate_number': gate.gate_number} for gate in gates]
+    }
+    return jsonify(data)
 
 if __name__ == '__main__':
     app.run(debug=True)

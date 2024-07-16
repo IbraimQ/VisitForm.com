@@ -8,7 +8,7 @@ import os
 from fpdf import FPDF
 
 app = Flask(__name__, template_folder='templates', static_folder='static')
-app.secret_key = os.urandom(24)
+app.secret_key = os.urandom(24)  # Secure random secret key
 app.config['DEBUG'] = True
 
 # Error handler for detailed error logging
@@ -23,7 +23,7 @@ server = 'LAPTOP-77204R0A\\SQLEXPRESS'
 database = 'FormVisitors'
 driver = 'ODBC Driver 17 for SQL Server'
 
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'mssql+pyodbc://@LAPTOP-77204R0A\\SQLEXPRESS/FormVisitors?driver=ODBC+Driver+17+for+SQL+Server&trusted_connection=yes')
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', f'mssql+pyodbc://@{server}/{database}?driver={driver}&trusted_connection=yes')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
@@ -33,7 +33,7 @@ migrate = Migrate(app, db)
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
-app.config['MAIL_USERNAME'] = 'ihemaa.4@gmail.com.com'
+app.config['MAIL_USERNAME'] = 'ihemaa.4@gmail.com'
 app.config['MAIL_PASSWORD'] = 'A123+123*/'
 
 mail = Mail(app)
@@ -243,7 +243,7 @@ def submit_form():
     pdf_output = f"uploads/Visitor_Details.pdf"
     pdf.output(pdf_output)
 
-    msg = Message(subject="New Visitor Request", sender='your-email@gmail.com', recipients=[manager_email])
+    msg = Message(subject="New Visitor Request", sender='ihemaa.4@gmail.com', recipients=[manager_email])
     msg.body = "Please find the visitor details attached."
     msg.html = body_html
 
@@ -273,7 +273,7 @@ def update_visit_status(visit_id):
     subject = "Update on Your Visit Request"
     body = f"Your visit request has been {status.lower()}."
 
-    msg = Message(subject, sender='your-email@gmail.com', recipients=[visitor.Email])
+    msg = Message(subject, sender='ihemaa.4@gmail.com', recipients=[visitor.Email])
     msg.body = body
 
     try:

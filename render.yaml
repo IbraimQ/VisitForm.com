@@ -4,8 +4,9 @@ services:
     env: python
     plan: free
     region: oregon
-    buildCommand: "pip install -r requirements.txt"
+    buildCommand: "pip install -r requirements.txt --prefer-binary"
     startCommand: "gunicorn app:app"
+    runtime: "python-3.9.7"
     envVars:
       - key: SECRET_KEY
         value: "132"

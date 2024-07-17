@@ -1,11 +1,10 @@
-from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
+from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
-from flask_mail import Mail, Message
 from flask_migrate import Migrate
 from werkzeug.exceptions import HTTPException
 from datetime import datetime
 import os
-from fpdf import FPDF
+from mailjet_rest import Client
 
 app = Flask(__name__, template_folder='templates', static_folder='static')
 app.secret_key = os.urandom(24)  # Secure random secret key
@@ -29,29 +28,30 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
-# Configuration for Flask-Mail
-app.config['MAIL_SERVER'] = 'smtp.gmail.com'
-app.config['MAIL_PORT'] = 587
-app.config['MAIL_USE_TLS'] = True
-app.config['MAIL_USERNAME'] = 'ihemaa.4@gmail.com'
-app.config['MAIL_PASSWORD'] = 'A123+123*/'
+# Configuration for Mailjet
+MAILJET_API_KEY = 'da6ba1e0f448a281debaf01c0476fe3a'
+MAILJET_API_SECRET = '58f716e364714d179d4875163c9a3482'  # Replace this with your Mailjet secret key
 
-mail = Mail(app)
+mailjet = Client(auth=(MAILJET_API_KEY, MAILJET_API_SECRET), version='v3.1')
 
 # Manager Model
 class Manager(db.Model):
     __tablename__ = 'Managers'
     id = db.Column('ManagerID', db.Integer, primary_key=True)
     name = db.Column('Name', db.String(50), nullable=False)
-    email = db.Column('Email', db.String(120), nullable=False)
+    email = db.Column('Email', db.String(120), nullable=False, unique=True)
+    password = db.Column('Password', db.String(120), nullable=False)
+    department = db.Column('Department', db.String(100), nullable=True)
+
+# ManagerAccount Model
+class ManagerAccount(db.Model):
+    __tablename__ = 'ManagerAccounts'
+    id = db.Column('ManagerAccountID', db.Integer, primary_key=True)
+    manager_id = db.Column('ManagerID', db.Integer, db.ForeignKey('Managers.ManagerID'), nullable=False)
+    username = db.Column('Username', db.String(50), nullable=False)
     password = db.Column('Password', db.String(120), nullable=False)
 
-# Gate Model
-class Gate(db.Model):
-    __tablename__ = 'Gates'
-    id = db.Column('GateID', db.Integer, primary_key=True)
-    gate_number = db.Column('GateNumber', db.String(50), nullable=False)
-    location = db.Column('Location', db.String(100), nullable=False)
+    manager = db.relationship('Manager', backref=db.backref('accounts', lazy=True))
 
 # Visitor Model
 class Visitor(db.Model):
@@ -61,30 +61,43 @@ class Visitor(db.Model):
     LastName = db.Column(db.String(50), nullable=False)
     PhoneNumber = db.Column(db.String(20), nullable=False)
     IDNumber = db.Column(db.String(20), nullable=False)
-    NumberOfVisitors = db.Column(db.Integer, nullable=False)
-    DateTime = db.Column(db.DateTime, nullable=False)
-    ManagerID = db.Column(db.Integer, db.ForeignKey('Managers.ManagerID'), nullable=False)
-    GateNumber = db.Column(db.Integer, db.ForeignKey('Gates.GateID'), nullable=False)
-    Status = db.Column(db.String(20), nullable=False, default='Pending')
     Email = db.Column(db.String(120), nullable=False)
+    VisitRequestID = db.Column(db.Integer, db.ForeignKey('VisitRequests.VisitRequestID'), nullable=False)
 
-# Visit Model
-class Visit(db.Model):
-    __tablename__ = 'Visits'
-    VisitID = db.Column(db.Integer, primary_key=True)
-    VisitorID = db.Column(db.Integer, db.ForeignKey('Visitors.VisitorID'), nullable=False)
+    visit_request = db.relationship('VisitRequest', back_populates='visitors')
+
+# VisitRequest Model
+class VisitRequest(db.Model):
+    __tablename__ = 'VisitRequests'
+    VisitRequestID = db.Column(db.Integer, primary_key=True)
     ManagerID = db.Column(db.Integer, db.ForeignKey('Managers.ManagerID'), nullable=False)
-    VisitDate = db.Column(db.DateTime, nullable=False)
     GateID = db.Column(db.Integer, db.ForeignKey('Gates.GateID'), nullable=False)
-    ApprovalStatus = db.Column(db.String(50), nullable=False, default='Pending')
+    Status = db.Column(db.String(20), nullable=False, default='Pending')
 
-    visitor = db.relationship('Visitor', backref=db.backref('visits', lazy=True))
-    manager = db.relationship('Manager', backref=db.backref('visits', lazy=True))
-    gate = db.relationship('Gate', backref=db.backref('visits', lazy=True))
+    manager = db.relationship('Manager', backref=db.backref('visit_requests', lazy=True))
+    gate = db.relationship('Gate', backref=db.backref('visit_requests', lazy=True))
+    visitors = db.relationship('Visitor', back_populates='visit_request')
+    visit_times = db.relationship('VisitTime', backref='visit_request', lazy=True)
+
+# VisitTime Model
+class VisitTime(db.Model):
+    __tablename__ = 'VisitTimes'
+    VisitTimeID = db.Column(db.Integer, primary_key=True)
+    VisitRequestID = db.Column(db.Integer, db.ForeignKey('VisitRequests.VisitRequestID'), nullable=False)
+    VisitDate = db.Column(db.Date, nullable=False)
+    StartTime = db.Column(db.Time, nullable=False)
+    EndTime = db.Column(db.Time, nullable=False)
+
+# Gate Model
+class Gate(db.Model):
+    __tablename__ = 'Gates'
+    id = db.Column('GateID', db.Integer, primary_key=True)
+    gate_number = db.Column('GateNumber', db.String(50), nullable=False)
+    location = db.Column('Location', db.String(100), nullable=False)
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return send_from_directory('.', 'index.html')
 
 @app.route('/form')
 def form():
@@ -95,14 +108,14 @@ def form():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        email = request.form['email']
+        username = request.form['username']
         password = request.form['password']
-        manager = Manager.query.filter_by(email=email, password=password).first()
-        if manager:
-            session['manager_id'] = manager.id
+        manager_account = ManagerAccount.query.filter_by(username=username, password=password).first()
+        if manager_account:
+            session['manager_id'] = manager_account.manager_id
             return redirect(url_for('manager_dashboard'))
         else:
-            flash('Invalid email or password')
+            flash('Invalid username or password')
     return render_template('login.html')
 
 @app.route('/signup', methods=['GET', 'POST'])
@@ -111,9 +124,34 @@ def signup():
         name = request.form['name']
         email = request.form['email']
         password = request.form['password']
-        new_manager = Manager(name=name, email=email, password=password)
+        confirm_password = request.form['confirm_password']
+        username = request.form['username']
+        department = request.form['department']
+
+        # Check if all fields are provided
+        if not all([name, email, password, confirm_password, username, department]):
+            flash('All fields are required')
+            return redirect(url_for('signup'))
+
+        # Check if passwords match
+        if password != confirm_password:
+            flash('Passwords do not match')
+            return redirect(url_for('signup'))
+
+        # Ensure email is unique
+        existing_manager = Manager.query.filter_by(email=email).first()
+        if existing_manager:
+            flash('Email already exists')
+            return redirect(url_for('signup'))
+
+        new_manager = Manager(name=name, email=email, password=password, department=department)
         db.session.add(new_manager)
         db.session.commit()
+
+        manager_account = ManagerAccount(manager_id=new_manager.id, username=username, password=password)
+        db.session.add(manager_account)
+        db.session.commit()
+
         return redirect(url_for('login'))
     return render_template('signup.html')
 
@@ -121,178 +159,202 @@ def signup():
 def manager_dashboard():
     if 'manager_id' not in session:
         return redirect(url_for('login'))
-    visits = Visit.query.filter_by(ApprovalStatus='Pending').all()
+    visits = VisitRequest.query.filter_by(ManagerID=session['manager_id'], Status='Pending').all()
     return render_template('manager_dashboard.html', visits=visits)
 
 @app.route('/submit', methods=['POST'])
 def submit_form():
-    num_visitors = int(request.form['numVisitors'])
-    first_names = request.form.getlist('firstName[]')
-    last_names = request.form.getlist('lastName[]')
-    phone_numbers = request.form.getlist('phoneNumber[]')
-    id_numbers = request.form.getlist('idNumber[]')
-    emails = request.form.getlist('email[]')
-    date_time_str = request.form['dateTime']
-    date_time = datetime.strptime(date_time_str, '%Y-%m-%dT%H:%M')
-    gate_number = request.form['gateNumber']
-    manager_id = request.form['manager']
-    
-    files = request.files.getlist('idAttachment[]')
-    file_paths = []
+    try:
+        num_visitors = int(request.form['numVisitors'])
+        manager_id = request.form['manager']
+        gate_id = request.form['gateNumber']
+        status = request.form['status']
+        
+        visit_request = VisitRequest(ManagerID=manager_id, GateID=gate_id, Status=status)
+        db.session.add(visit_request)
+        db.session.commit()
 
-    for file in files:
-        file_path = os.path.join('uploads', file.filename)
-        os.makedirs(os.path.dirname(file_path), exist_ok=True)
-        file.save(file_path)
-        file_paths.append(file_path)
+        visitors = []
+        for i in range(num_visitors):
+            first_name = request.form.get(f'firstName[{i}]')
+            last_name = request.form.get(f'lastName[{i}]')
+            phone_number = request.form.get(f'phoneNumber[{i}]')
+            id_number = request.form.get(f'idNumber[{i}]')
+            email = request.form.get(f'email[{i}]')
+            id_attachment = request.files.get(f'idAttachment[{i}]')
+            
+            if not (first_name and last_name and phone_number and id_number and email and id_attachment):
+                return "Missing required fields", 400
 
-    manager = Manager.query.get(manager_id)
-    
-    if manager is None:
-        return "Manager not found", 400
+            file_path = os.path.join('uploads', id_attachment.filename)
+            os.makedirs(os.path.dirname(file_path), exist_ok=True)
+            id_attachment.save(file_path)
+            
+            visitor = Visitor(
+                FirstName=first_name,
+                LastName=last_name,
+                PhoneNumber=phone_number,
+                IDNumber=id_number,
+                Email=email,
+                VisitRequestID=visit_request.VisitRequestID
+            )
+            db.session.add(visitor)
+            visitors.append(visitor)
 
-    manager_email = manager.email
+        visit_dates = request.form.getlist('visitDate[]')
+        start_times = request.form.getlist('startTime[]')
+        end_times = request.form.getlist('endTime[]')
 
-    # Create PDF and email body for all visitors
-    pdf = FPDF()
-    pdf.add_page()
-    pdf.set_font("Arial", size=12)
-    pdf.cell(200, 10, txt="Visitor Details", ln=True, align="C")
+        visit_times = []
+        for visit_date, start_time, end_time in zip(visit_dates, start_times, end_times):
+            visit_time = VisitTime(
+                VisitRequestID=visit_request.VisitRequestID,
+                VisitDate=visit_date,
+                StartTime=start_time,
+                EndTime=end_time
+            )
+            db.session.add(visit_time)
+            visit_times.append(visit_time)
 
+        db.session.commit()
+
+        # Send email to the manager
+        manager = Manager.query.get(manager_id)
+        if manager:
+            send_email(manager, visitors, visit_times, gate_id)
+
+        return redirect(url_for('submission_success'))
+    except Exception as e:
+        return str(e), 400
+
+@app.route('/update_visit_status/<int:visit_id>', methods=['POST'])
+def update_visit_status(visit_id):
+    if 'manager_id' not in session:
+        return redirect(url_for('login'))
+    visit = VisitRequest.query.get_or_404(visit_id)
+    status = request.form['status']
+    visit.Status = status
+    db.session.commit()
+
+    visitors = Visitor.query.filter_by(VisitRequestID=visit_id).all()
+    for visitor in visitors:
+        send_status_email(visitor, status)
+        
+    return redirect(url_for('manager_dashboard'))
+
+@app.route('/api/managers_and_gates', methods=['GET'])
+def get_managers_and_gates():
+    managers = Manager.query.all()
+    gates = Gate.query.all()
+    data = {
+        'managers': [{'id': manager.id, 'name': manager.name, 'department': manager.department} for manager in managers],
+        'gates': [{'id': gate.id, 'gate_number': gate.gate_number} for gate in gates]
+    }
+    return jsonify(data)
+
+def send_email(manager, visitors, visit_times, gate_id):
     body_html = """
     <html>
     <body>
         <h2>Visitor Details</h2>
         <table border="1" cellpadding="5" cellspacing="0">
     """
-
-    for i in range(num_visitors):
-        new_visitor = Visitor(
-            FirstName=first_names[i],
-            LastName=last_names[i],
-            PhoneNumber=phone_numbers[i],
-            IDNumber=id_numbers[i],
-            NumberOfVisitors=num_visitors,
-            DateTime=date_time,
-            ManagerID=manager_id,
-            GateNumber=gate_number,
-            Status='Pending',
-            Email=emails[i]
-        )
-        db.session.add(new_visitor)
-        db.session.commit()
-        
-        visitor_id = new_visitor.VisitorID
-
-        new_visit = Visit(
-            VisitorID=visitor_id,
-            ManagerID=manager_id,
-            VisitDate=date_time,
-            GateID=gate_number,
-            ApprovalStatus='Pending'
-        )
-        db.session.add(new_visit)
-        db.session.commit()
-
-        with open(file_paths[i], 'rb') as f:
-            file_data = f.read()
-
-        # Add visitor details to PDF
-        pdf.cell(200, 10, txt=f"Visitor {i + 1}", ln=True, align="C")
-        pdf.cell(200, 10, txt=f"First Name: {first_names[i]}", ln=True)
-        pdf.cell(200, 10, txt=f"Last Name: {last_names[i]}", ln=True)
-        pdf.cell(200, 10, txt=f"Phone Number: {phone_numbers[i]}", ln=True)
-        pdf.cell(200, 10, txt=f"ID/Iqama: {id_numbers[i]}", ln=True)
-        pdf.cell(200, 10, txt=f"Number of Visitors: {num_visitors}", ln=True)
-        pdf.cell(200, 10, txt=f"Date/Time: {date_time.strftime('%Y-%m-%d %I:%M %p')}", ln=True)
-        pdf.cell(200, 10, txt=f"Gate Number: {gate_number}", ln=True)
-        # Add visitor details to email body
+    for i, visitor in enumerate(visitors):
         body_html += f"""
             <tr>
                 <th colspan="2">Visitor {i + 1}</th>
             </tr>
             <tr>
-                <th>First Name</th><td>{first_names[i]}</td>
+                <th>First Name</th><td>{visitor.FirstName}</td>
             </tr>
             <tr>
-                <th>Last Name</th><td>{last_names[i]}</td>
+                <th>Last Name</th><td>{visitor.LastName}</td>
             </tr>
             <tr>
-                <th>Phone Number</th><td>{phone_numbers[i]}</td>
+                <th>Phone Number</th><td>{visitor.PhoneNumber}</td>
             </tr>
             <tr>
-                <th>ID/Iqama</th><td>{id_numbers[i]}</td>
+                <th>ID/Iqama</th><td>{visitor.IDNumber}</td>
             </tr>
         """
-
     body_html += f"""
             <tr>
-                <th>Number of Visitors</th><td>{num_visitors}</td>
+                <th>Number of Visitors</th><td>{len(visitors)}</td>
             </tr>
             <tr>
-                <th>Date/Time</th><td>{date_time.strftime('%Y-%m-%d %I:%M %p')}</td>
+                <th>Gate Number</th><td>{gate_id}</td>
             </tr>
+        </table>
+        <h2>Visit Times</h2>
+        <table border="1" cellpadding="5" cellspacing="0">
+    """
+    for visit_time in visit_times:
+        body_html += f"""
             <tr>
-                <th>Gate Number</th><td>{gate_number}</td>
+                <th>Visit Date</th><td>{visit_time.VisitDate}</td>
+                <th>From</th><td>{visit_time.StartTime}</td>
+                <th>To</th><td>{visit_time.EndTime}</td>
             </tr>
+        """
+    body_html += """
         </table>
     </body>
     </html>
     """
 
-    pdf_output = f"uploads/Visitor_Details.pdf"
-    pdf.output(pdf_output)
+    data = {
+        'Messages': [
+            {
+                "From": {
+                    "Email": "ihemaa.4@gmail.com",
+                    "Name": "Cameron Al-rushaid"
+                },
+                "To": [
+                    {
+                        "Email": manager.email,
+                        "Name": manager.name
+                    }
+                ],
+                "Subject": "New Visitor Request",
+                "HTMLPart": body_html
+            }
+        ]
+    }
 
-    msg = Message(subject="New Visitor Request", sender='ihemaa.4@gmail.com', recipients=[manager_email])
-    msg.body = "Please find the visitor details attached."
-    msg.html = body_html
+    result = mailjet.send.create(data=data)
+    if result.status_code != 200:
+        print(f"Error sending email to manager: {result.json()}")
 
-    for i, file_path in enumerate(file_paths):
-        with open(file_path, 'rb') as f:
-            file_data = f.read()
-            msg.attach(files[i].filename, files[i].content_type, file_data)
-
-    msg.attach("Visitor_Details.pdf", 'application/pdf', open(pdf_output, 'rb').read())
-
-    try:
-        mail.send(msg)
-        return render_template('submit.html')
-    except Exception as e:
-        return str(e)
-
-@app.route('/update_visit_status/<int:visit_id>', methods=['POST'])
-def update_visit_status(visit_id):
-    if 'manager_id' not in session:
-        return redirect(url_for('login'))
-    visit = Visit.query.get_or_404(visit_id)
-    status = request.form['status']
-    visit.ApprovalStatus = status
-    db.session.commit()
-
-    visitor = Visitor.query.get(visit.VisitorID)
+def send_status_email(visitor, status):
     subject = "Update on Your Visit Request"
     body = f"Your visit request has been {status.lower()}."
 
-    msg = Message(subject, sender='ihemaa.4@gmail.com', recipients=[visitor.Email])
-    msg.body = body
-
-    try:
-        mail.send(msg)
-    except Exception as e:
-        return str(e)
-        
-    return redirect(url_for('manager_dashboard'))
-
-# Add the new route to fetch managers and gates
-@app.route('/api/managers_and_gates', methods=['GET'])
-def get_managers_and_gates():
-    managers = Manager.query.all()
-    gates = Gate.query.all()
     data = {
-        'managers': [{'id': manager.id, 'name': manager.name} for manager in managers],
-        'gates': [{'id': gate.id, 'gate_number': gate.gate_number} for gate in gates]
+        'Messages': [
+            {
+                "From": {
+                    "Email": "ihemaa.4@gmail.com",
+                    "Name": "Cameron Al-rushaid"
+                },
+                "To": [
+                    {
+                        "Email": visitor.Email,
+                        "Name": visitor.FirstName
+                    }
+                ],
+                "Subject": subject,
+                "TextPart": body
+            }
+        ]
     }
-    return jsonify(data)
+
+    result = mailjet.send.create(data=data)
+    if result.status_code != 200:
+        print(f"Error sending status email to visitor: {result.json()}")
+
+@app.route('/submission_success')
+def submission_success():
+    return render_template('submit.html')
 
 if __name__ == '__main__':
     app.run(debug=True)

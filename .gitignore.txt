@@ -68,3 +68,8 @@ venv/
 
 # Custom
 uploads/
+.gcloudignore
+.git
+.gitignore
+venv/
+__pycache__/

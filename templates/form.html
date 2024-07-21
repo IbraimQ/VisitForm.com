@@ -40,30 +40,33 @@
             });
         }
 
-        document.addEventListener('DOMContentLoaded', fetchManagersAndGates);
-
-        function addVisitorField() {
+        function updateVisitorFields() {
             const visitorsContainer = document.getElementById('VisitorsContainer');
-            const visitorIndex = visitorsContainer.childElementCount / 7; // Adjusted to 7 fields per visitor
-            const visitorDiv = document.createElement('div');
-            visitorDiv.innerHTML = `
-                <div>
-                    <label for="firstName[${visitorIndex}]">First Name:</label>
-                    <input type="text" name="firstName[${visitorIndex}]" required>
-                    <label for="lastName[${visitorIndex}]">Last Name:</label>
-                    <input type="text" name="lastName[${visitorIndex}]" required>
-                    <label for="phoneNumber[${visitorIndex}]">Phone Number:</label>
-                    <input type="text" name="phoneNumber[${visitorIndex}]" required>
-                    <label for="idNumber[${visitorIndex}]">ID/Iqama Number:</label>
-                    <input type="text" name="idNumber[${visitorIndex}]" required>
-                    <label for="email[${visitorIndex}]">Email:</label>
-                    <input type="email" name="email[${visitorIndex}]" required>
-                    <label for="idAttachment[${visitorIndex}]">ID Attachment:</label>
-                    <input type="file" name="idAttachment[${visitorIndex}]" required>
-                    <button type="button" onclick="removeVisitorField(this)">Remove</button>
-                </div>
-            `;
-            visitorsContainer.appendChild(visitorDiv);
+            const numVisitors = document.getElementById('numVisitors').value;
+
+            visitorsContainer.innerHTML = '';
+
+            for (let i = 0; i < numVisitors; i++) {
+                const visitorDiv = document.createElement('div');
+                visitorDiv.innerHTML = `
+                    <div>
+                        <h3>Visitor ${i + 1}:</h3>
+                        <label for="firstName[${i}]">First Name:</label>
+                        <input type="text" name="firstName[${i}]" required>
+                        <label for="lastName[${i}]">Last Name:</label>
+                        <input type="text" name="lastName[${i}]" required>
+                        <label for="phoneNumber[${i}]">Phone Number:</label>
+                        <input type="text" name="phoneNumber[${i}]" required>
+                        <label for="idNumber[${i}]">ID/Iqama Number:</label>
+                        <input type="text" name="idNumber[${i}]" required>
+                        <label for="email[${i}]">Email:</label>
+                        <input type="email" name="email[${i}]" required>
+                        <label for="idAttachment[${i}]">ID Attachment:</label>
+                        <input type="file" name="idAttachment[${i}][]" required>
+                    </div>
+                `;
+                visitorsContainer.appendChild(visitorDiv);
+            }
         }
 
         function removeVisitorField(button) {
@@ -74,9 +77,7 @@
         function addTimeSlot() {
             const timeSlotContainer = document.getElementById('timeSlotsContainer');
             const timeSlotDiv = document.createElement('div');
-            timeSlotDiv.style.display = 'flex';
-            timeSlotDiv.style.alignItems = 'center';
-            timeSlotDiv.style.marginBottom = '10px';
+            timeSlotDiv.classList.add('time-slot');
             timeSlotDiv.innerHTML = `
                 <label for="visitDate" style="margin-right: 5px;">Visit Date:</label>
                 <input type="date" name="visitDate[]" required style="margin-right: 10px;">
@@ -84,7 +85,7 @@
                 <input type="time" name="startTime[]" required style="margin-right: 10px;">
                 <label for="endTime" style="margin-right: 5px;">To:</label>
                 <input type="time" name="endTime[]" required style="margin-right: 10px;">
-                <button type="button" onclick="removeTimeSlot(this)" style="margin-left: 10px;">Remove</button>
+                <button type="button" class="remove-time-slot" onclick="removeTimeSlot(this)">X</button>
             `;
             timeSlotContainer.appendChild(timeSlotDiv);
         }
@@ -95,7 +96,8 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            addVisitorField();
+            fetchManagersAndGates();
+            updateVisitorFields();
             addTimeSlot();
         });
     </script>
@@ -103,13 +105,9 @@
 <body>
     <div class="navbar">
         <div class="logo">
-            <img src="{{ url_for('static', filename='assets/Camreon-icon.jpeg') }}" alt="Logo">
-        </div>
-        <div class="nav-options">
-            <a href="{{ url_for('index') }}">Home</a>
-            <a href="#">Link</a>
-            <a href="#">Dropdown</a>
-            <a href="#" class="disabled">Disabled</a>
+            <a href="{{ url_for('index') }}">
+                <img src="{{ url_for('static', filename='assets/cal.png') }}" alt="Logo">
+            </a>
         </div>
     </div>
 
@@ -121,24 +119,29 @@
         </div>
         <div class="right">
             <form id="visitForm" action="/submit" method="POST" enctype="multipart/form-data">
-                <label for="numVisitors">Choose the number of Visitors:</label><br>
-                <input type="number" id="numVisitors" name="numVisitors" min="1" max="15" value="1" class="contact-inputs" onchange="addVisitorField()"><br><br>
+                <div class="form-section">
+                    <label for="numVisitors">Choose the number of Visitors:</label><br>
+                    <input type="number" id="numVisitors" name="numVisitors" min="1" max="15" value="1" class="contact-inputs" onchange="updateVisitorFields()"><br><br>
+                </div>
 
-                <div id="VisitorsContainer"></div>
+                <div class="form-section">
+                    <label for="manager">CHOOSE A MANAGER*</label><br>
+                    <select id="manager" name="manager" required></select><br><br>
+                    <label for="gateNumber">Gate Number:</label>
+                    <select id="gateNumber" name="gateNumber" required></select><br><br>
+                </div>
 
-                <div id="timeSlotsContainer">
+                <div class="form-section" id="VisitorsContainer"></div>
+                <div class="form-section" id="timeSlotsContainer">
                     <label>Visit Time Slots:</label>
                     <button type="button" onclick="addTimeSlot()">Add Time Slot</button>
                 </div>
 
-                <label for="manager">CHOOSE A MANAGER*</label><br>
-                <select id="manager" name="manager" required></select><br><br>
-                <label for="gateNumber">Gate Number:</label>
-                <select id="gateNumber" name="gateNumber" required></select><br><br>
-
                 <input type="hidden" name="status" value="Pending">
 
-                <button type="submit">Submit</button>
+                <div class="form-section">
+                    <button type="submit" id="submitButton">Submit</button>
+                </div>
             </form>
         </div>
     </div>

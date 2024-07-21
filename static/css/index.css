@@ -8,22 +8,19 @@ body, html {
 }
 
 .navbar {
-    height: 70px;
-    padding-top: 0;
-    padding-bottom: 0;
-    margin-top: -10px;
+    width: 100%;
+    padding: 10px 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    box-sizing: border-box;
     background-color: white;
 }
 
-.navbar-brand {
-    display: flex;
-    align-items: center;
-}
-
-.navbar-nav .nav-link {
-    padding-top: 0;
-    padding-bottom: 0;
-    line-height: 50px;
+.logo img {
+    height: 50px;
+    width: auto;
 }
 
 .content {
@@ -118,4 +115,57 @@ body, html {
 
 .choice-card:hover .choice-description {
     display: block;
+}
+
+/* Media queries for responsiveness */
+
+/* Tablets */
+@media (max-width: 768px) {
+    .main-box {
+        padding: 20px;
+    }
+
+    .choice-container {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .choice-box {
+        width: 100%;
+        max-width: 300px;
+        height: auto;
+    }
+}
+
+/* Phones */
+@media (max-width: 480px) {
+    .main-box {
+        padding: 10px;
+    }
+
+    .page-title {
+        font-size: 28px;
+    }
+
+    .subtitle {
+        font-size: 14px;
+    }
+
+    .choice-box {
+        width: 100%;
+        max-width: 250px;
+        height: auto;
+    }
+
+    .choice-image {
+        width: 80px;
+    }
+
+    .choice-title {
+        font-size: 18px;
+    }
+
+    .choice-description {
+        font-size: 12px;
+    }
 }

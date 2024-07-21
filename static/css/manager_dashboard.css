@@ -21,3 +21,60 @@ table {
 .btn {
     margin-right: 10px;
 }
+
+/* Media queries for responsiveness */
+
+/* Tablets */
+@media (max-width: 768px) {
+    .container {
+        padding: 10px;
+    }
+
+    table {
+        font-size: 12px;
+    }
+
+    .btn {
+        margin-bottom: 10px;
+    }
+
+    th, td {
+        padding: 8px;
+    }
+}
+
+/* Phones */
+@media (max-width: 480px) {
+    .container {
+        padding: 5px;
+    }
+
+    table {
+        font-size: 10px;
+    }
+
+    .btn {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+
+    th, td {
+        padding: 6px;
+    }
+
+    .form-select {
+        width: 100%;
+    }
+
+    .d-inline {
+        display: block;
+    }
+
+    .text-center {
+        font-size: 18px;
+    }
+
+    h1 {
+        font-size: 24px;
+    }
+}

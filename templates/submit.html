@@ -4,14 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Submission Successful</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/submit.css') }}">
+    <link rel="stylesheet" href="../static/css/submit.css">
 </head>
 <body>
     <div class="success-container">
-        <img src="{{ url_for('static', filename='assets/TickMark.png') }}" alt="Success" class="success-image">
+        <img src="../static/assets/TickMark.png" alt="Success" class="success-image">
         <h1>Submission Successful!</h1>
         <p>Your form has been submitted successfully.</p>
-        <a href="{{ url_for('form') }}" class="back-link">Back to Form</a>
+        <a href="../templates/form.html" class="back-link">Back to Form</a>
     </div>
 </body>
 </html>
